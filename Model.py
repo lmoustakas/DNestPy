@@ -17,7 +17,6 @@ class Model:
 		Draw the parameters from the prior
 		"""
 		self.logl[1] = rng.rand()
-		self.calculateLogLikelihood()
 
 	def calculateLogLikelihood(self):
 		"""
@@ -42,7 +41,7 @@ class Model:
 		logH = proposal.perturb()
 		if logH > 0.0:
 			logH = 0.0
-		if rng.rand() <= exp(logH) and proposal.logl >= level:
+		if rng.rand() <= np.exp(logH) and proposal.logl >= level:
 			return proposal
 		else:
 			return self
