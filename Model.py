@@ -30,7 +30,6 @@ class Model:
 		"""
 		self.logl[1] += 10.0**(1.5 - 6.0*rng.rand())*rng.randn()
 		self.logl[1] = np.mod(self.logl[1], 1.0)
-		return 0.0
 
 	def update(self, level):
 		"""

@@ -3,6 +3,9 @@ import numpy as np
 import numpy.random as rng
 
 class TestModel(Model):
+	"""
+	An example model
+	"""
 	def __init__(self):
 		Model.__init__(self)
 		self.params = np.zeros(20)
@@ -18,7 +21,7 @@ class TestModel(Model):
 		self.params[which] += 10.0**(1.5 - 6.0*rng.rand())*rng.randn()
 		self.params[which] = np.mod(self.params[which] + 0.5,\
 					1.0) - 0.5
-		logH += Model.perturb(self)
+		Model.perturb(self)
 		self.calculateLogLikelihood()
 		return logH
 
