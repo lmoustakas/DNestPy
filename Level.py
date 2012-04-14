@@ -6,7 +6,8 @@ class Level:
 	"""
 	def __init__(self, logX=0.0, logL=[-np.inf, 0.0]):
 		"""
-		Construct a level
+		Construct a level. By default, logX = 0
+		and logL = [-np.inf, 0.0]. i.e. the prior.
 		"""
 		self.logX, self.logL = logX, logL
 		self.tries = 0
