@@ -36,6 +36,7 @@ class LevelSet:
 		Optional: load from file `filename`
 		"""
 		self.levels = []
+		self.logLKeep = [] # Accumulation, for making new levels
 
 		if filename == None:
 			# Start with one level, the prior
@@ -74,6 +75,12 @@ class LevelSet:
 		Put all levels in a single string, each level on a line
 		"""
 		return "".join([str(l) + '\n' for l in self.levels])
+
+	def __len__(self):
+		"""
+		Return number of levels
+		"""
+		return len(self.levels)
 
 if __name__ == '__main__':
 	levels = LevelSet()

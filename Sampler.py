@@ -19,16 +19,17 @@ class Sampler:
 	"""
 	A single DNest sampler.
 	"""
-	def __init__(self, ModelType, options=Options()):
+	def __init__(self, ModelType, options=Options(), levelsFile=None):
 		"""
-		Input: The class to be used, and an options object
+		Input: The class to be used
+		Optional: `options`: Options object
+		`levelsFile`: Filename to load pre-made levels from
 		"""
 		self.options = options
 		self.models = [ModelType()\
 				for i in xrange(0, options.numParticles)]
 		self.indices = [0 for i in xrange(0, options.numParticles)]
-		self.levels = [Level()]
-		self.logLKeep = []
+		self.levels = LevelSet(levelsFile)
 
 	def run(self):
 		"""
