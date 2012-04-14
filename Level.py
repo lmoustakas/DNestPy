@@ -63,6 +63,34 @@ class LevelSet:
 		self.levels[index].accepts += int(accepted)
 		self.levels[index].tries += 1
 
+	def updateExceeds(self, index, exceeds):
+		"""
+		Input: `index`: which level particle is in
+		`exceeds`: whether it exceeds the level above
+		"""
+		print("Level.updateExceeds not implemented yet")
+		pass
+
+	def updateLogLKeep(self, logL):
+		"""
+		If the logLikelihood is above the highest level,
+		store it.
+		Input: logLikelihood seen
+		"""
+		if logL > self.levels[-1].logL:
+			self.logLKeep.append(logL)
+
+	def maybeAddLevel(self, newLevelInterval):
+		if len(self.logLKeep >= newLevelInterval):
+			self.logLKeep = sorted(self.logLKeep)
+			index = int(0.63212*len(self.logLKeep))
+			print("# Creating a new level with logL = "\
+				+ str(self.logLKeep[index][0]))
+			newLevel = Level(self.levels[-1].logX - 1.0,\
+					self.logLKeep[index])
+			self.levels.append(newLevel)
+			self.logLKeep = self.logLKeep[index+1:]
+
 	def save(self, filename='levels.txt'):
 		"""
 		Write out all of the levels to a text file.

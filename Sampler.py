@@ -53,6 +53,10 @@ class Sampler:
 		"""
 		for which in xrange(0, self.options.numParticles):
 			self.models[which].fromPrior()
+			if len(self.levels) < options.maxNumLevels:
+				self.levels.updateLogLKeep(self.models[which].logL)
+				self.levels.maybeAddLevel(\
+					self.options.newLevelInterval)
 		self.initialised = True
 
 	def step(self, numSteps=1):
@@ -68,6 +72,11 @@ class Sampler:
 			else:
 				self.updateModel(which)
 				self.updateIndex(which)
+
+			if len(self.levels) < options.maxNumLevels:
+				self.levels.updateLogLKeep(self.models[which].logL)
+				self.levels.maybeAddLevel(\
+					self.options.newLevelInterval)
 
 	def updateModel(self, which):
 		"""
@@ -86,13 +95,15 @@ class Sampler:
 		if delta == 0:
 			delta = 2*rng.randint(2) - 1
 		proposed = self.indices[which] + delta
+		# Immediate reject if proposed index was out of bounds
 		if proposed < 0 or proposed >= len(self.levels):
 			return
 
 		# Acceptance probability
-		logAlpha = self.levels[indices[which]].logX\
+		logAlpha = self.levels[self.indices[which]].logX\
 			- self.levels[proposed].logX \
-			+ self.logPush(proposed) - self.logPush(indices[which])
+			+ self.logPush(proposed)\
+			- self.logPush(self.indices[which])
 		if logAlpha > 0.0:
 			logAlpha = 0.0
 
@@ -138,7 +149,8 @@ if __name__ == '__main__':
 	options.load("OPTIONS")
 	sampler = Sampler(TestModel, options=options)
 	sampler.initialise()
-	sampler.step(1000)
+	sampler.step(1000000)
 	sampler.saveLevels()
+	print(sampler.levels.logLKeep)
 
 
