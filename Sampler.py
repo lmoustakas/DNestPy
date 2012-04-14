@@ -6,14 +6,28 @@ class Options:
 	DNest Options
 	"""
 	def __init__(self, numParticles=1, newLevelInterval=10000,\
-			saveInterval=10000, lamb=10.0, beta=10.0,
-			maxNumLevels=100):
+			maxNumLevels=100,saveInterval=10000, lamb=10.0,\
+			beta=10.0, deleteParticles=True, maxNumSaves=np.inf):
 		self.numParticles = numParticles
 		self.newLevelInterval = newLevelInterval
+		self.maxNumLevels = maxNumLevels
 		self.saveInterval = saveInterval
 		self.lamb = lamb
 		self.beta = beta
-		self.maxNumLevels = maxNumLevels
+		self.deleteParticles = deleteParticles
+		self.maxNumSaves = maxNumSaves
+
+	def load(self, filename="OPTIONS"):
+		opts = np.loadtxt(filename, dtype=int)
+		self.numParticles = opts[0]
+		self.newLevelInterval = opts[1]
+		self.maxNumLevels = opts[2]
+		self.lamb = float(opts[3])
+		self.beta = float(opts[4])
+		self.deleteParticles = bool(opts[5])
+		self.maxNumSaves = opts[6]
+		if self.maxNumSaves == 0:
+			self.maxNumSaves = np.inf
 
 class Sampler:
 	"""
@@ -37,7 +51,6 @@ class Sampler:
 		"""
 		for which in xrange(0, self.options.numParticles):
 			self.models[which].fromPrior()
-			self.updateVisits(which)
 
 	#	while True:
 	#		self.step()
@@ -67,7 +80,7 @@ class Sampler:
 		"""
 		Move which particle a level is in
 		"""
-		delta = int(np.round(10.0**(2.0*rng.rand())*rng.randn()))\
+		delta = np.round(10.0**(2.0*rng.rand())*rng.randn())\
 				.astype(int)
 		if delta == 0:
 			delta = 2*rng.randint(2) - 1
@@ -75,7 +88,15 @@ class Sampler:
 		if proposed < 0 or proposed >= len(self.levels):
 			return
 
+		# Acceptance probability
+		logAlpha = self.levels[indices[which]].logX\
+			- self.levels[proposed].logX \
+			+ self.logPush(proposed) - self.logPush(indices[which])
+		if logAlpha > 0.0:
+			logAlpha = 0.0
 
+		if rng.rand() <= np.exp(logAlpha):
+			self.indices[which] = proposed
 
 	def updateVisits(self, which):
 		"""
@@ -92,15 +113,19 @@ class Sampler:
 			if self.models[which].logL > self.levels[index+1].logL:
 				self.levels[index].exceeds += 1
 		
-#	def logPush(self):
-		
-
+	def logPush(self, index):
+		"""
+		Calculate the relative weighting of levels,
+		for acceptance probability for Sampler.updateIndex()
+		"""
+		assert index >= 0 and index < len(self.levels)
+		result = 0.0
+		if len(self.levels) < self.options.maxNumLevels:
+			result += float(index)/self.options.lamb
+		return result
 
 if __name__ == '__main__':
-	from TestModel import *
-	s = Sampler(TestModel)
-	s.run()
-	s.step(20)
-	print(s.logLKeep)
-	print s.levels[0]
+	options = Options()
+	options.load("OPTIONS")
+	print options
 
