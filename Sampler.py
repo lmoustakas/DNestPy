@@ -6,12 +6,12 @@ class Options:
 	DNest Options
 	"""
 	def __init__(self, numParticles=1, newLevelInterval=10000,\
-			maxNumLevels=100,saveInterval=10000, lamb=10.0,\
+			saveInterval=10000, maxNumLevels=100, lamb=10.0,\
 			beta=10.0, deleteParticles=True, maxNumSaves=np.inf):
 		self.numParticles = numParticles
 		self.newLevelInterval = newLevelInterval
+		self.saveInterval = saveInterval				
 		self.maxNumLevels = maxNumLevels
-		self.saveInterval = saveInterval
 		self.lamb = lamb
 		self.beta = beta
 		self.deleteParticles = deleteParticles
@@ -21,11 +21,12 @@ class Options:
 		opts = np.loadtxt(filename, dtype=int)
 		self.numParticles = opts[0]
 		self.newLevelInterval = opts[1]
-		self.maxNumLevels = opts[2]
-		self.lamb = float(opts[3])
-		self.beta = float(opts[4])
-		self.deleteParticles = bool(opts[5])
-		self.maxNumSaves = opts[6]
+		self.saveInterval = opts[2]
+		self.maxNumLevels = opts[3]
+		self.lamb = float(opts[4])
+		self.beta = float(opts[5])
+		self.deleteParticles = bool(opts[6])
+		self.maxNumSaves = opts[7]
 		if self.maxNumSaves == 0:
 			self.maxNumSaves = np.inf
 
