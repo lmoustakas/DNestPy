@@ -15,6 +15,14 @@ class Level:
 		self.visits = 0
 		self.exceeds = 0
 
+	def __str__(self):
+		s = str(self.logX) + " " + str(self.logL[0]) + " " \
+			+ str(self.logL[1]) + " "\
+			+ str(self.tries) + " "\
+			+ str(self.accepts) + " " + str(self.visits) + " "\
+			+ str(self.exceeds) + " "
+		return s
+
 if __name__ == '__main__':
 	level = Level()
 	print(level)
