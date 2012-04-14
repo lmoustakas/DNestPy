@@ -179,9 +179,14 @@ class Sampler:
 		for acceptance probability for Sampler.updateIndex()
 		"""
 		assert index >= 0 and index < len(self.levels)
-		result = 0.0
-		if len(self.levels) < self.options.maxNumLevels:
-			result += float(index)/self.options.lamb
+		if len(self.levels) >= self.options.maxNumLevels:
+			return 0.0
+
+		distance = len(self.levels) - 1 - index
+		result = -distance/self.options.lamb
+		if not self.options.deleteParticles:
+			if result <= -5.0:
+				result = -5.0
 		return result
 
 	def saveLevels(self, filename="levels.txt"):
