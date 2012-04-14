@@ -1,4 +1,6 @@
-A pure Python implementation of Diffusive Nested Sampling.
+A Python implementation of Diffusive Nested Sampling.
+
+Licence: GPL
 
 (c) 2012 Brendon J. Brewer
 
