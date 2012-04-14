@@ -48,10 +48,35 @@ class Sampler:
 		"""
 		for i in xrange(0, numSteps):
 			which = rng.randint(self.options.numParticles)
-			[self.models[which], accepted] = self.models[which]\
-				.update(self.levels[self.indices[which]])
-			self.updateVisits(which)
-		
+
+			if rng.rand() <= 0.5:
+				self.updateIndex(which)
+				self.updateModel(which)
+			else:
+				self.updateModel(which)
+				self.updateIndex(which)
+
+	def updateModel(self, which):
+		"""
+		Move a particle
+		"""
+		[self.models[which], accepted] = self.models[which]\
+			.update(self.levels[self.indices[which]])
+
+	def updateIndex(self, which):
+		"""
+		Move which particle a level is in
+		"""
+		delta = int(np.round(10.0**(2.0*rng.rand())*rng.randn()))\
+				.astype(int)
+		if delta == 0:
+			delta = 2*rng.randint(2) - 1
+		proposed = self.indices[which] + delta
+		if proposed < 0 or proposed >= len(self.levels):
+			return
+
+
+
 	def updateVisits(self, which):
 		"""
 		Update visits/exceeds level statistics
