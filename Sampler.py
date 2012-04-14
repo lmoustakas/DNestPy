@@ -183,7 +183,7 @@ class Sampler:
 		result = 0.0
 		if len(self.levels) >= self.options.maxNumLevels:
 			# All levels made, do uniform exploration, use beta
-			result -= self.options.beta*np.log(self.levels[which].tries)
+			result -= self.options.beta*np.log(self.levels[index].tries + 1)
 		else:
 			# All levels not made, do pushed-up exploration,
 			# ignore beta
