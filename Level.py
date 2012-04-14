@@ -17,6 +17,9 @@ class Level:
 		self.visits = 0
 
 	def __str__(self):
+		"""
+		Represent the level as a string
+		"""
 		s = str(self.logX) + " " + str(self.logL[0]) + " " \
 			+ str(self.logL[1]) + " "\
 			+ str(self.accepts) + " "\
@@ -34,7 +37,10 @@ class LevelSet:
 		"""
 		self.levels = []
 
-		if filename != None:
+		if filename == None:
+			# Start with one level, the prior
+			self.levels.append(Level())
+		else:
 			f = open('levels.txt', 'r')
 			lines = f.readlines()
 			for l in lines:
@@ -46,11 +52,30 @@ class LevelSet:
 				level.exceeds = int(stuff[5])
 				level.visits = int(stuff[6])
 				self.levels.append(level)
+			f.close()
+
+	def save(self, filename='levels.txt'):
+		"""
+		Write out all of the levels to a text file.
+		Default filename='levels.txt'
+		"""
+		f = open(filename, 'w')
+		f.write(str(self))
+		f.close()
+
+	def __getitem__(self, i):
+		"""
+		This is like overloading operator [] (LevelSet, int)
+		"""
+		return self.levels[i]
 
 	def __str__(self):
+		"""
+		Put all levels in a single string, each level on a line
+		"""
 		return "".join([str(l) + '\n' for l in self.levels])
 
 if __name__ == '__main__':
-	levels = LevelSet('levels.txt')
-	print(levels)
+	levels = LevelSet()
+	levels.save('test.txt')
 
