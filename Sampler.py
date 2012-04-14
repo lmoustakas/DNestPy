@@ -106,6 +106,7 @@ class Sampler:
 				added = self.levels.maybeAddLevel(\
 					self.options.newLevelInterval)
 				if added:
+					self.deleteModel()
 					self.levels.recalculateLogX(self.options.newLevelInterval)
 					self.levels.save()
 
@@ -172,7 +173,17 @@ class Sampler:
 			self.levels[index].visits += 1
 			if self.models[which].logL > self.levels[index+1].logL:
 				self.levels[index].exceeds += 1
-		
+
+	def deleteModel(self):
+		for i in xrange(0, len(self.models)):
+			if (len(self.levels) - 1 - self.indices[i]) > (5*self.options.lamb + 1) and self.options.numParticles > 1:
+				copy = rng.randint(self.options.numParticles)
+				while copy == i:
+					copy = rng.randint(self.options.numParticles)
+				self.models[i] = self.models[copy]
+				self.indices[i] = self.indices[copy]
+				print("# Deleted a particle. Replacing it with a copy of a survivor.")
+
 	def logPush(self, index):
 		"""
 		Calculate the relative weighting of levels,
