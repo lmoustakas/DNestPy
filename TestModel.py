@@ -1,19 +1,11 @@
 from Model import *
 import numpy as np
 import numpy.random as rng
-"""
-def logsumexp(logx1, logx2):
-	\"""
-	Logarithmic addition
-	\"""
-	biggest = np.max([logx1, logx2])
-	logx1_ = logx1 - biggest
-	logx2_ = logx2 - biggest
-	result = np.log(np.sum(np.exp([logx1_, logx2_])))
-	result += biggest
-	return result
-"""
+
 def logsumexp(values):
+	"""
+	Logarithmic addition
+	"""
 	biggest = np.max(values)
 	x = values - biggest
 	result = np.log(np.sum(np.exp(x))) + biggest
@@ -62,20 +54,11 @@ class TestModel(Model):
 		Likelihood function: Mixture of two Gaussians
 		"""
 		logL1 = self.numParams*TestModel.C
-		logL1 += -self.numParams*TestModel.logu - 0.5*np.sum((self.params/TestModel.u)**2)
+		logL1 += -self.numParams*TestModel.logu - 0.5*np.sum(((self.params - 0.031)/TestModel.u)**2)
 		logL2 = self.numParams*TestModel.C
 		logL2 += -self.numParams*TestModel.logv - 0.5*np.sum((self.params/TestModel.v)**2)
 		self.logL[0] = logsumexp([TestModel.w + logL1, logL2])
 
 	def __str__(self):
 		return "".join(str(i) + " " for i in self.params)
-
-if __name__ == '__main__':
-	from Level import *
-	l = Level()
-	t = TestModel()
-	t.fromPrior()
-	for i in xrange(0, 1000):
-		t = t.update(l)[0]
-		print(str(t))
 
