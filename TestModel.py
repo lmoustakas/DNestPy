@@ -2,6 +2,18 @@ from Model import *
 import numpy as np
 import numpy.random as rng
 
+def logsumexp(logx1, logx2):
+	"""
+	Logarithmic addition
+	"""
+	biggest = np.max([logx1, logx2])
+	logx1_ = logx1 - biggest
+	logx2_ = logx2 - biggest
+	result = np.log(np.sum(np.exp([logx1_, logx2_])))
+	result += biggest
+	return result
+
+
 class TestModel(Model):
 	"""
 	An example model
@@ -33,9 +45,14 @@ class TestModel(Model):
 
 	def calculateLogLikelihood(self):
 		"""
-		Likelihood function: Just a gaussian
+		Likelihood function: Mixture of two Gaussians
 		"""
-		self.logL[0] = -0.5*np.sum((self.params/0.01)**2)
+		u = 0.01
+		v = 0.1
+		C = np.log(1.0/np.sqrt(2.0*np.pi))
+		logL1 = -len(self.params)*(C + np.log(u)) - 0.5*np.sum((self.params/u)**2)
+		logL2 = -len(self.params)*(C + np.log(v)) - 0.5*np.sum((self.params/v)**2)
+		self.logL[0] = logsumexp(logL1, logL2)
 
 	def __str__(self):
 		return "".join(str(i) + " " for i in self.params)
@@ -46,6 +63,6 @@ if __name__ == '__main__':
 	t = TestModel()
 	t.fromPrior()
 	for i in xrange(0, 1000):
-		t = t.update(l)
+		t = t.update(l)[0]
 		print(str(t))
 
