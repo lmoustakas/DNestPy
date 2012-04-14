@@ -55,6 +55,14 @@ class LevelSet:
 				self.levels.append(level)
 			f.close()
 
+	def updateAccepts(self, index, accepted):
+		"""
+		Input: `index`: which level particle was in
+		`accepted`: whether it was accepted or not
+		"""
+		self.levels[index].accepts += int(accepted)
+		self.levels[index].tries += 1
+
 	def save(self, filename='levels.txt'):
 		"""
 		Write out all of the levels to a text file.

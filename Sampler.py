@@ -45,24 +45,23 @@ class Sampler:
 				for i in xrange(0, options.numParticles)]
 		self.indices = [0 for i in xrange(0, options.numParticles)]
 		self.levels = LevelSet(levelsFile)
+		self.initialised = False # Models have been fromPriored?
 
-	def run(self):
+	def initialise(self):
 		"""
-		Initialise the models from the prior, and then run the sampler!
+		Initialise the models from the prior
 		"""
 		for which in xrange(0, self.options.numParticles):
 			self.models[which].fromPrior()
-
-	#	while True:
-	#		self.step()
+		self.initialised = True
 
 	def step(self, numSteps=1):
 		"""
 		Take numSteps steps of the sampler. default=1
 		"""
+		assert self.initialised
 		for i in xrange(0, numSteps):
 			which = rng.randint(self.options.numParticles)
-
 			if rng.rand() <= 0.5:
 				self.updateIndex(which)
 				self.updateModel(which)
@@ -76,6 +75,7 @@ class Sampler:
 		"""
 		[self.models[which], accepted] = self.models[which]\
 			.update(self.levels[self.indices[which]])
+		self.levels.updateAccepts(self.indices[which], accepted)
 
 	def updateIndex(self, which):
 		"""
@@ -125,8 +125,20 @@ class Sampler:
 			result += float(index)/self.options.lamb
 		return result
 
+	def saveLevels(self, filename="levels.txt"):
+		"""
+		Save the level structure to a file
+		default: levels.txt
+		"""
+		self.levels.save(filename)
+
 if __name__ == '__main__':
+	from TestModel import *
 	options = Options()
 	options.load("OPTIONS")
-	print options
+	sampler = Sampler(TestModel, options=options)
+	sampler.initialise()
+	sampler.step(1000)
+	sampler.saveLevels()
+
 
