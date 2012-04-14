@@ -8,42 +8,42 @@ class Model:
 	"""
 	def __init__(self):
 		"""
-		Set the loglikelihood+tieBreaker tuple to nothing
+		Set the logLikelihood+tieBreaker tuple to nothing
 		"""
-		self.logl = [None, None]
+		self.logL = [None, None]
 
 	def fromPrior(self):
 		"""
 		Draw the parameters from the prior
 		"""
-		self.logl[1] = rng.rand()
+		self.logL[1] = rng.rand()
 
 	def calculateLogLikelihood(self):
 		"""
 		Define the likelihood function
 		"""
-		self.logl[0] = 0.0
+		self.logL[0] = 0.0
 
 	def perturb(self):
 		"""
 		Perturb, for metropolis
 		"""
-		self.logl[1] += 10.0**(1.5 - 6.0*rng.rand())*rng.randn()
-		self.logl[1] = np.mod(self.logl[1], 1.0)
+		self.logL[1] += 10.0**(1.5 - 6.0*rng.rand())*rng.randn()
+		self.logL[1] = np.mod(self.logL[1], 1.0)
 
 	def update(self, level):
 		"""
 		Do a Metropolis step wrt the given level
 		"""
-		assert self.logl >= level
+		assert self.logL >= level
 		proposal = copy.deepcopy(self)
 		logH = proposal.perturb()
 		if logH > 0.0:
 			logH = 0.0
-		if rng.rand() <= np.exp(logH) and proposal.logl >= level:
-			return proposal
+		if rng.rand() <= np.exp(logH) and proposal.logL >= level:
+			return [proposal, True]
 		else:
-			return self
+			return [self, False]
 
 if __name__ == '__main__':
 	"""
