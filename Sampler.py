@@ -29,15 +29,25 @@ class Sampler:
 		self.logLKeep = []
 
 	def run(self):
-		for model in self.models:
-			model.fromPrior()
-			self.logLKeep.append(model.logl)
+		for which in xrange(0, self.options.numParticles):
+			self.models[which].fromPrior()
+			self.updateLevelStatistics(which)
+
 	#	while True:
 	#		self.step()
 
-	def step(self):
-		which = rng.randint(options.numParticles)
+	def step(self, numSteps=1):
+		for i in xrange(0, numSteps):
+			which = rng.randint(self.options.numParticles)
+			[self.models[which], accepted] = self.models[which]\
+				.update(self.levels[self.indices[which]])
+			self.updateLevelStatistics(which, accepted)
 		
+	def updateLevelStatistics(self, which, accepted):
+		if self.models[which].logL > self.levels[-1].logL\
+			and len(self.levels) < self.options.maxNumLevels:
+			self.logLKeep.append(self.models[which].logL)
+
 		
 #	def logPush(self):
 		
@@ -47,4 +57,6 @@ if __name__ == '__main__':
 	from TestModel import *
 	s = Sampler(TestModel)
 	s.run()
+	s.step(20)
 	print(s.logLKeep)
+
