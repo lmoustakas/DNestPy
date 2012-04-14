@@ -97,6 +97,9 @@ class Sampler:
 				self.updateIndex(which)
 			self.steps += 1
 
+			self.levels.updateExceeds(self.indices[which],\
+				self.models[which].logL)
+
 			if len(self.levels) < self.options.maxNumLevels:
 				# Accumulate logLKeep, possibly make a new level
 				self.levels.updateLogLKeep(self.models[which].logL)
