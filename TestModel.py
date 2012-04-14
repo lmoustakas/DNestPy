@@ -11,17 +11,17 @@ class TestModel(Model):
 		self.params = np.zeros(20)
 
 	def fromPrior(self):
-	"""
-	Generate all parameters iid from U(-0.5, 0.5)
-	"""
+		"""
+		Generate all parameters iid from U(-0.5, 0.5)
+		"""
 		self.params = -0.5 + rng.rand(self.params.size)		
 		Model.fromPrior(self)
 		self.calculateLogLikelihood()
 
 	def perturb(self):
-	"""
-	Metropolis proposal: perturb one parameter
-	"""
+		"""
+		Metropolis proposal: perturb one parameter
+		"""
 		logH = 0.0
 		which = rng.randint(self.params.size)
 		self.params[which] += 10.0**(1.5 - 6.0*rng.rand())*rng.randn()
@@ -32,10 +32,10 @@ class TestModel(Model):
 		return logH
 
 	def calculateLogLikelihood(self):
-	"""
-	Likelihood function: Just a gaussian
-	"""
-		self.logl[0] = -0.5*np.sum((self.params/0.01)**2)
+		"""
+		Likelihood function: Just a gaussian
+		"""
+		self.logL[0] = -0.5*np.sum((self.params/0.01)**2)
 
 	def __str__(self):
 		return "".join(str(i) + " " for i in self.params)
