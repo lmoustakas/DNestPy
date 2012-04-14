@@ -106,6 +106,7 @@ class Sampler:
 				added = self.levels.maybeAddLevel(\
 					self.options.newLevelInterval)
 				if added:
+					self.levels.recalculateLogX(self.options.newLevelInterval)
 					self.levels.save()
 
 			if self.steps%self.options.saveInterval == 0:
@@ -121,6 +122,7 @@ class Sampler:
 				+ str(self.models[which].logL[1]) + " "\
 				+ str(which) + "\n")
 				f.close()
+				self.levels.recalculateLogX(self.options.newLevelInterval)
 				self.levels.save()
 
 	def updateModel(self, which):

@@ -73,6 +73,17 @@ class LevelSet:
 			if logL >= self.levels[index+1].logL:
 				self.levels[index].exceeds += 1
 
+	def recalculateLogX(self, regularisation):
+		"""
+		Re-estimate the logX values for the levels
+		using the exceeds/visits information.
+		"""
+		self.levels[0].logX = 0.0
+		q = np.exp(-1.0)
+		for i in xrange(1, len(self.levels)):
+			self.levels[i].logX = self.levels[i-1].logX \
+				+ np.log(float(self.levels[i-1].exceeds + q*regularisation)/(self.levels[i-1].visits + regularisation))
+
 	def updateLogLKeep(self, logL):
 		"""
 		If the logLikelihood is above the highest level,
