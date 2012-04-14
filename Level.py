@@ -81,15 +81,19 @@ class LevelSet:
 			self.logLKeep.append(logL)
 
 	def maybeAddLevel(self, newLevelInterval):
-		if len(self.logLKeep >= newLevelInterval):
+		added = False
+		if len(self.logLKeep) >= newLevelInterval:
 			self.logLKeep = sorted(self.logLKeep)
 			index = int(0.63212*len(self.logLKeep))
-			print("# Creating a new level with logL = "\
+			print("# Creating level " + str(len(self.levels))\
+				+ " with logL = "\
 				+ str(self.logLKeep[index][0]))
 			newLevel = Level(self.levels[-1].logX - 1.0,\
 					self.logLKeep[index])
 			self.levels.append(newLevel)
 			self.logLKeep = self.logLKeep[index+1:]
+			added = True
+		return added
 
 	def save(self, filename='levels.txt'):
 		"""

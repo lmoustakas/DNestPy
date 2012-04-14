@@ -35,12 +35,12 @@ class Model:
 		"""
 		Do a Metropolis step wrt the given level
 		"""
-		assert self.logL >= level
+		assert self.logL >= level.logL
 		proposal = copy.deepcopy(self)
 		logH = proposal.perturb()
 		if logH > 0.0:
 			logH = 0.0
-		if rng.rand() <= np.exp(logH) and proposal.logL >= level:
+		if rng.rand() <= np.exp(logH) and proposal.logL >= level.logL:
 			return [proposal, True]
 		else:
 			return [self, False]

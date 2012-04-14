@@ -1,9 +1,9 @@
 # File containing parameters for DNest samplers
 1	# Number of particles per thread
 10000	# new level interval
-100000	# save interval
+10000	# save interval
 100	# maximum number of levels
-10	# Backtracking scale length (lambda in the paper)
+1	# Backtracking scale length (lambda in the paper)
 10	# Strength of effect to force histogram to equal push. 0-10 is best. (beta in the paper)
 1	# Delete particles
 0	# Maximum number of saves (0 = infinite)

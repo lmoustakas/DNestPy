@@ -50,9 +50,11 @@ class TestModel(Model):
 		u = 0.01
 		v = 0.1
 		C = np.log(1.0/np.sqrt(2.0*np.pi))
-		logL1 = -len(self.params)*(C + np.log(u)) - 0.5*np.sum((self.params/u)**2)
-		logL2 = -len(self.params)*(C + np.log(v)) - 0.5*np.sum((self.params/v)**2)
-		self.logL[0] = logsumexp(logL1, logL2)
+		logL1 = len(self.params)*C
+		logL1 += -len(self.params)*np.log(u) - 0.5*np.sum((self.params/u)**2)
+		logL2 = len(self.params)*C
+		logL2 += -len(self.params)*np.log(v) - 0.5*np.sum((self.params/v)**2)
+		self.logL[0] = logsumexp(np.log(100.0) + logL1, logL2)
 
 	def __str__(self):
 		return "".join(str(i) + " " for i in self.params)

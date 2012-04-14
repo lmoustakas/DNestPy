@@ -34,11 +34,15 @@ class Sampler:
 	"""
 	A single DNest sampler.
 	"""
-	def __init__(self, ModelType, options=Options(), levelsFile=None):
+	def __init__(self, ModelType, options=Options(), levelsFile=None\
+			,sampleFile="sample.txt"\
+			,sampleInfoFile="sample_info.txt"):
 		"""
 		Input: The class to be used
 		Optional: `options`: Options object
 		`levelsFile`: Filename to load pre-made levels from
+		`sampleFile`: Filename to save samples to
+		`sampleInfoFile`: Filename to save sample info to
 		"""
 		self.options = options
 		self.models = [ModelType()\
@@ -46,6 +50,16 @@ class Sampler:
 		self.indices = [0 for i in xrange(0, options.numParticles)]
 		self.levels = LevelSet(levelsFile)
 		self.initialised = False # Models have been fromPriored?
+		self.steps = 0 # Count number of MCMC steps taken
+
+		self.sampleFile = sampleFile
+		self.sampleInfoFile = sampleInfoFile
+		# Empty the files
+		f = open(self.sampleFile, "w")
+		f.close()
+		f = open(self.sampleInfoFile, "w")
+		f.close()
+		self.levels.save()
 
 	def initialise(self):
 		"""
@@ -53,17 +67,26 @@ class Sampler:
 		"""
 		for which in xrange(0, self.options.numParticles):
 			self.models[which].fromPrior()
-			if len(self.levels) < options.maxNumLevels:
+			if len(self.levels) < self.options.maxNumLevels:
 				self.levels.updateLogLKeep(self.models[which].logL)
 				self.levels.maybeAddLevel(\
 					self.options.newLevelInterval)
 		self.initialised = True
 
+	def run(self):
+		"""
+		Run forever.
+		"""
+		while True:
+			self.step()
+
 	def step(self, numSteps=1):
 		"""
 		Take numSteps steps of the sampler. default=1
 		"""
-		assert self.initialised
+		if not self.initialised:
+			self.initialise()
+
 		for i in xrange(0, numSteps):
 			which = rng.randint(self.options.numParticles)
 			if rng.rand() <= 0.5:
@@ -72,11 +95,30 @@ class Sampler:
 			else:
 				self.updateModel(which)
 				self.updateIndex(which)
+			self.steps += 1
 
-			if len(self.levels) < options.maxNumLevels:
+			if len(self.levels) < self.options.maxNumLevels:
+				# Accumulate logLKeep, possibly make a new level
 				self.levels.updateLogLKeep(self.models[which].logL)
-				self.levels.maybeAddLevel(\
+				added = self.levels.maybeAddLevel(\
 					self.options.newLevelInterval)
+				if added:
+					self.levels.save()
+
+			if self.steps%self.options.saveInterval == 0:
+				# Save a particle and the levels
+				print("Saving a particle. N = "\
+				+ str(self.steps/self.options.saveInterval) + ".")
+				f = open('sample.txt', 'a')
+				f.write(str(self.models[which]) + '\n')
+				f.close()
+				f = open('sample_info.txt', 'a')
+				f.write(str(self.indices[which]) + " " \
+				+ str(self.models[which].logL[0]) + " "\
+				+ str(self.models[which].logL[1]) + " "\
+				+ str(which) + "\n")
+				f.close()
+				self.levels.save()
 
 	def updateModel(self, which):
 		"""
@@ -88,7 +130,7 @@ class Sampler:
 
 	def updateIndex(self, which):
 		"""
-		Move which particle a level is in
+		Move which level a particle is in
 		"""
 		delta = np.round(10.0**(2.0*rng.rand())*rng.randn())\
 				.astype(int)
@@ -107,7 +149,8 @@ class Sampler:
 		if logAlpha > 0.0:
 			logAlpha = 0.0
 
-		if rng.rand() <= np.exp(logAlpha):
+		if rng.rand() <= np.exp(logAlpha) and \
+			self.models[which].logL >= self.levels[proposed].logL:
 			self.indices[which] = proposed
 
 	def updateVisits(self, which):
@@ -148,9 +191,10 @@ if __name__ == '__main__':
 	options = Options()
 	options.load("OPTIONS")
 	sampler = Sampler(TestModel, options=options)
-	sampler.initialise()
-	sampler.step(1000000)
-	sampler.saveLevels()
-	print(sampler.levels.logLKeep)
 
+	import cProfile
+	import pstats
+	cProfile.run('sampler.step(100000)', 'profile')
+	p = pstats.Stats('profile')
+	p.sort_stats('time').print_stats(10)
 
