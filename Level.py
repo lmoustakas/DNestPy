@@ -16,6 +16,17 @@ class Level:
 		self.exceeds = 0
 		self.visits = 0
 
+	def renormaliseVisits(regularisation):
+		"""
+		Make level stats of order `regularisation`
+		"""
+		if self.tries >= regularisation:
+			self.accepts = int(float(self.accepts+1)/(self.tries+1)*regularisation)
+			self.tries = regularisation
+		if self.visits >= regularisation:
+			self.exceeds = int(float(self.exceeds+1)/(self.visits+1)*regularisation)
+			self.visits = regularisation
+
 	def __str__(self):
 		"""
 		Represent the level as a string
@@ -84,6 +95,14 @@ class LevelSet:
 			self.levels[i].logX = self.levels[i-1].logX \
 				+ np.log(float(self.levels[i-1].exceeds + q*regularisation)/(self.levels[i-1].visits + regularisation))
 
+	def renormaliseVisits(self, regularisation):
+		"""
+		Reset all visits, exceeds etc to be of order
+		regularisation
+		"""
+		for level in self.levels:
+			level.renormaliseVisits(regularisation)
+
 	def updateLogLKeep(self, logL):
 		"""
 		If the logLikelihood is above the highest level,
@@ -106,6 +125,8 @@ class LevelSet:
 			self.levels.append(newLevel)
 			self.logLKeep = self.logLKeep[index+1:]
 			added = True
+			if len(self.logLKeep) == newLevelInterval:
+				self.renormaliseVisits(newLevelInterval)
 		return added
 
 	def save(self, filename='levels.txt'):
