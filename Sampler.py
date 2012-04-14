@@ -111,7 +111,7 @@ class Sampler:
 
 			if self.steps%self.options.saveInterval == 0:
 				# Save a particle and the levels
-				print("Saving a particle. N = "\
+				print("# Saving a particle. N = "\
 				+ str(self.steps/self.options.saveInterval) + ".")
 				f = open('sample.txt', 'a')
 				f.write(str(self.models[which]) + '\n')
@@ -179,14 +179,20 @@ class Sampler:
 		for acceptance probability for Sampler.updateIndex()
 		"""
 		assert index >= 0 and index < len(self.levels)
-		if len(self.levels) >= self.options.maxNumLevels:
-			return 0.0
 
-		distance = len(self.levels) - 1 - index
-		result = -distance/self.options.lamb
-		if not self.options.deleteParticles:
-			if result <= -5.0:
-				result = -5.0
+		result = 0.0
+		if len(self.levels) >= self.options.maxNumLevels:
+			# All levels made, do uniform exploration, use beta
+			result -= self.options.beta*np.log(self.levels[which].tries)
+		else:
+			# All levels not made, do pushed-up exploration,
+			# ignore beta
+			distance = len(self.levels) - 1 - index
+			result = -distance/self.options.lamb
+			if not self.options.deleteParticles:
+				if result <= -5.0:
+					result = -5.0
+		
 		return result
 
 	def saveLevels(self, filename="levels.txt"):
