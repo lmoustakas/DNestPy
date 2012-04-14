@@ -63,13 +63,15 @@ class LevelSet:
 		self.levels[index].accepts += int(accepted)
 		self.levels[index].tries += 1
 
-	def updateExceeds(self, index, exceeds):
+	def updateExceeds(self, index, logL):
 		"""
 		Input: `index`: which level particle is in
-		`exceeds`: whether it exceeds the level above
+		logL: its logLikelihood
 		"""
-		print("Level.updateExceeds not implemented yet")
-		pass
+		if index < (len(self.levels)-1):
+			self.levels[index].visits += 1
+			if logL >= self.levels[index+1].logL:
+				self.levels[index].exceeds += 1
 
 	def updateLogLKeep(self, logL):
 		"""
